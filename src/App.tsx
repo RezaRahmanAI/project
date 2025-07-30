@@ -6,6 +6,12 @@ import { TopFilters } from './components/TopFilters';
 import { Cart } from './components/Cart';
 import { ProductModal } from './components/ProductModal';
 import { Footer } from './components/Footer';
+import { AdminLayout } from './components/admin/AdminLayout';
+import { Dashboard } from './components/admin/Dashboard';
+import { ProductManagement } from './components/admin/ProductManagement';
+import { CategoryManagement } from './components/admin/CategoryManagement';
+import { BrandManagement } from './components/admin/BrandManagement';
+import { OrderManagement } from './components/admin/OrderManagement';
 import { products, categories, brands } from './data/products';
 import { Product, CartItem } from './types';
 
@@ -15,6 +21,56 @@ function App() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
+  const [currentView, setCurrentView] = useState<'main' | 'admin'>('main');
+  const [adminSection, setAdminSection] = useState('dashboard');
+  
+  // Admin data states
+  const [adminProducts, setAdminProducts] = useState(products);
+  const [adminCategories, setAdminCategories] = useState([
+    { id: '1', name: 'T-Shirts', description: 'Comfortable and stylish t-shirts', productCount: 3 },
+    { id: '2', name: 'Jackets', description: 'Outerwear for all seasons', productCount: 2 },
+    { id: '3', name: 'Pants', description: 'Bottoms for every occasion', productCount: 1 },
+    { id: '4', name: 'Sweaters', description: 'Cozy knitwear', productCount: 1 },
+    { id: '5', name: 'Hoodies', description: 'Casual comfort wear', productCount: 1 },
+    { id: '6', name: 'Blazers', description: 'Professional attire', productCount: 1 },
+    { id: '7', name: 'Accessories', description: 'Complete your look', productCount: 1 }
+  ]);
+  const [adminBrands, setAdminBrands] = useState([
+    { id: '1', name: 'Urban Essentials', description: 'Modern streetwear', productCount: 1 },
+    { id: '2', name: 'Heritage Denim', description: 'Classic denim craftsmanship', productCount: 1 },
+    { id: '3', name: 'Modern Fit', description: 'Contemporary tailoring', productCount: 1 },
+    { id: '4', name: 'Luxury Knits', description: 'Premium knitwear', productCount: 1 },
+    { id: '5', name: 'Active Wear', description: 'Performance clothing', productCount: 1 },
+    { id: '6', name: 'Formal Elegance', description: 'Sophisticated formal wear', productCount: 1 },
+    { id: '7', name: 'Elegant Essentials', description: 'Timeless elegance', productCount: 1 },
+    { id: '8', name: 'Luxury Leather', description: 'Premium leather goods', productCount: 1 }
+  ]);
+  const [adminOrders, setAdminOrders] = useState([
+    {
+      id: '#1234',
+      customerName: 'John Doe',
+      customerEmail: 'john@example.com',
+      items: [
+        { productName: 'Premium Cotton T-Shirt', quantity: 2, price: 79, size: 'M', color: 'Black' }
+      ],
+      total: 158,
+      status: 'processing' as const,
+      orderDate: '2024-01-15',
+      shippingAddress: '123 Main St, City, State 12345'
+    },
+    {
+      id: '#1235',
+      customerName: 'Jane Smith',
+      customerEmail: 'jane@example.com',
+      items: [
+        { productName: 'Vintage Denim Jacket', quantity: 1, price: 189, size: 'L', color: 'Light Blue' }
+      ],
+      total: 189,
+      status: 'shipped' as const,
+      orderDate: '2024-01-14',
+      shippingAddress: '456 Oak Ave, City, State 12345'
+    }
+  ]);
   
   // Filter states
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -141,11 +197,80 @@ function App() {
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
+    if (tab === 'admin') {
+      setCurrentView('admin');
+      return;
+    }
+    setCurrentView('main');
     // Reset filters when changing tabs for better UX
     setSelectedCategory('All');
     setSelectedBrand('All');
     setPriceRange([0, 500]);
     setSortBy('featured');
+  };
+
+  const handleAdminSectionChange = (section: string) => {
+    if (section === 'main') {
+      setCurrentView('main');
+      setActiveTab('home');
+    } else {
+      setAdminSection(section);
+    }
+  };
+
+  // Admin handlers
+  const handleAddProduct = (productData: Omit<Product, 'id'>) => {
+    const newProduct = {
+      ...productData,
+      id: Date.now().toString()
+    };
+    setAdminProducts(prev => [...prev, newProduct]);
+  };
+
+  const handleUpdateProduct = (id: string, productData: Partial<Product>) => {
+    setAdminProducts(prev => prev.map(p => p.id === id ? { ...p, ...productData } : p));
+  };
+
+  const handleDeleteProduct = (id: string) => {
+    setAdminProducts(prev => prev.filter(p => p.id !== id));
+  };
+
+  const handleAddCategory = (categoryData: { name: string; description: string }) => {
+    const newCategory = {
+      ...categoryData,
+      id: Date.now().toString(),
+      productCount: 0
+    };
+    setAdminCategories(prev => [...prev, newCategory]);
+  };
+
+  const handleUpdateCategory = (id: string, categoryData: Partial<{ name: string; description: string }>) => {
+    setAdminCategories(prev => prev.map(c => c.id === id ? { ...c, ...categoryData } : c));
+  };
+
+  const handleDeleteCategory = (id: string) => {
+    setAdminCategories(prev => prev.filter(c => c.id !== id));
+  };
+
+  const handleAddBrand = (brandData: { name: string; description: string; logo?: string }) => {
+    const newBrand = {
+      ...brandData,
+      id: Date.now().toString(),
+      productCount: 0
+    };
+    setAdminBrands(prev => [...prev, newBrand]);
+  };
+
+  const handleUpdateBrand = (id: string, brandData: Partial<{ name: string; description: string; logo?: string }>) => {
+    setAdminBrands(prev => prev.map(b => b.id === id ? { ...b, ...brandData } : b));
+  };
+
+  const handleDeleteBrand = (id: string) => {
+    setAdminBrands(prev => prev.filter(b => b.id !== id));
+  };
+
+  const handleUpdateOrderStatus = (id: string, status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled') => {
+    setAdminOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
   };
 
   const getTabTitle = () => {
@@ -169,6 +294,76 @@ function App() {
 
   const showHero = activeTab === 'home';
 
+  // Render admin panel
+  if (currentView === 'admin') {
+    const renderAdminContent = () => {
+      switch (adminSection) {
+        case 'dashboard':
+          return <Dashboard />;
+        case 'products':
+          return (
+            <ProductManagement
+              products={adminProducts}
+              onAddProduct={handleAddProduct}
+              onUpdateProduct={handleUpdateProduct}
+              onDeleteProduct={handleDeleteProduct}
+            />
+          );
+        case 'categories':
+          return (
+            <CategoryManagement
+              categories={adminCategories}
+              onAddCategory={handleAddCategory}
+              onUpdateCategory={handleUpdateCategory}
+              onDeleteCategory={handleDeleteCategory}
+            />
+          );
+        case 'brands':
+          return (
+            <BrandManagement
+              brands={adminBrands}
+              onAddBrand={handleAddBrand}
+              onUpdateBrand={handleUpdateBrand}
+              onDeleteBrand={handleDeleteBrand}
+            />
+          );
+        case 'orders':
+          return (
+            <OrderManagement
+              orders={adminOrders}
+              onUpdateOrderStatus={handleUpdateOrderStatus}
+            />
+          );
+        case 'users':
+          return (
+            <div className="text-center py-20">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">User Management</h2>
+              <p className="text-gray-600">User management features coming soon...</p>
+            </div>
+          );
+        case 'settings':
+          return (
+            <div className="text-center py-20">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Settings</h2>
+              <p className="text-gray-600">Settings panel coming soon...</p>
+            </div>
+          );
+        default:
+          return <Dashboard />;
+      }
+    };
+
+    return (
+      <AdminLayout
+        activeSection={adminSection}
+        onSectionChange={handleAdminSectionChange}
+      >
+        {renderAdminContent()}
+      </AdminLayout>
+    );
+  }
+
+  // Render main e-commerce site
   return (
     <div className="min-h-screen bg-gray-50">
       <Header 
@@ -177,6 +372,7 @@ function App() {
         onMenuClick={() => {}}
         activeTab={activeTab}
         onTabChange={handleTabChange}
+        onAdminClick={() => setCurrentView('admin')}
       />
       
       {showHero && <Hero onShopNow={() => setActiveTab('new-arrivals')} />}

@@ -8,6 +8,7 @@ interface HeaderProps {
   onMenuClick: () => void;
   activeTab: string;
   onTabChange: (tab: string) => void;
+  onAdminClick: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -15,7 +16,8 @@ export const Header: React.FC<HeaderProps> = ({
   onCartClick, 
   onMenuClick, 
   activeTab, 
-  onTabChange 
+  onTabChange,
+  onAdminClick
 }) => {
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -75,6 +77,12 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
             <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200">
               <User size={20} />
+            </button>
+            <button 
+              onClick={onAdminClick}
+              className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-all duration-200 text-sm font-medium"
+            >
+              Admin
             </button>
             <button 
               onClick={onCartClick}
